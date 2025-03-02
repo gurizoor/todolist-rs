@@ -8,10 +8,7 @@ pub use web_sys::{HtmlElement, HtmlInputElement};
 pub use web_sys::wasm_bindgen::prelude::Closure;
 pub use gloo_storage::LocalStorage;
 pub use gloo_storage::Storage;
-// pub use std::rc::Rc;
-// pub use std::cell::RefCell;
 pub use chrono::*;
-pub use chrono::prelude::*;
 
 pub use serde::{Serialize, Deserialize};
 

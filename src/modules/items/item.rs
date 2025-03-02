@@ -1,4 +1,4 @@
-use web_sys::{Element, HtmlElement, HtmlInputElement};
+use web_sys::Element;
 use super::super::lib::*;
 
 impl Item {
