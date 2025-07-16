@@ -66,3 +66,21 @@ pub fn task_button() -> Style {
         "#
     ).unwrap()
 }
+
+pub fn task_checkbox() -> Style {
+    style!(
+        r#"
+            accent-color: rgba(80, 120, 255, 1);
+        "#
+    ).unwrap()
+}
+
+pub fn folder_input() -> Style {
+    style!(
+        r#"
+            accent-color: rgba(80, 120, 255, 1);
+            background-color: rgb(30, 30, 30);
+            border: 1px solid rgb(255, 255, 255);
+        "#
+    ).unwrap()
+}

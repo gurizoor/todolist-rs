@@ -49,10 +49,12 @@ pub fn app() -> Html {
             if item.is_task {
                 input_element.set_type("checkbox");
                 input_element.set_checked(item.checked);
+                input_element.set_attribute("class", task_checkbox().get_class_name()).unwrap();
             } else {
                 input_element.set_type("radio");
                 input_element.set_name("folder");
                 input_element.set_checked(item.checked);
+                input_element.set_attribute("class", folder_input().get_class_name()).unwrap();
                 new_div.set_attribute("class", div_list().get_class_name()).unwrap();
             }
 
@@ -178,7 +180,7 @@ pub fn app() -> Html {
                 // tasks will be appended here
             </div>
 
-            <a>{"ver 0.1.3"}</a>
+            <a>{"ver 0.1.4"}</a>
         </div>
     }
 }
