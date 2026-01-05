@@ -1,19 +1,19 @@
-use web_sys::Element;
 use super::super::lib::*;
+use web_sys::Element;
 
 impl Item {
-/// Create a new `Item` instance.
-///
-/// This function initializes a new `Item` with the provided `id`, `checked` state,
-/// and `is_task` flag. The `level` of the item is determined by the count of
-/// "-+" in the `id`, and the `value` is derived from the last part of the `id`.
-///
-/// # Arguments
-///
-/// * `id` - A `String` representing the unique identifier for the item, which
-///   also determines the `level` and `value`.
-/// * `checked` - A `bool` indicating whether the item is checked or not.
-/// * `is_task` - A `bool` indicating whether the item is a task.
+    /// Create a new `Item` instance.
+    ///
+    /// This function initializes a new `Item` with the provided `id`, `checked` state,
+    /// and `is_task` flag. The `level` of the item is determined by the count of
+    /// "-+" in the `id`, and the `value` is derived from the last part of the `id`.
+    ///
+    /// # Arguments
+    ///
+    /// * `id` - A `String` representing the unique identifier for the item, which
+    ///   also determines the `level` and `value`.
+    /// * `checked` - A `bool` indicating whether the item is checked or not.
+    /// * `is_task` - A `bool` indicating whether the item is a task.
 
     pub fn new(id: String, checked: bool, is_task: bool) -> Item {
         Item {
@@ -25,11 +25,11 @@ impl Item {
         }
     }
 
-/// Return a new `Item` instance with the `checked` state updated.
-///
-/// This function creates a new `Item` with the same `id` and `is_task`
-/// attributes, but with the `checked` attribute set to the provided value.
-/// It is useful for updating the checked state of an item.
+    /// Return a new `Item` instance with the `checked` state updated.
+    ///
+    /// This function creates a new `Item` with the same `id` and `is_task`
+    /// attributes, but with the `checked` attribute set to the provided value.
+    /// It is useful for updating the checked state of an item.
 
     pub fn set_checked(&self, checked: bool) -> Self {
         Item::new(self.id.clone(), checked, self.is_task)
@@ -53,7 +53,9 @@ impl Item {
         let mut parts: Vec<String> = self.id.split("-+").map(String::from).collect();
         parts.pop();
         let parent_id = parts.join("-+");
-        document.get_element_by_id(&parent_id).expect("parent is None!")
+        document
+            .get_element_by_id(&parent_id)
+            .expect("parent is None!")
     }
 
     /// Remove the element with the same ID as the item from the DOM.
@@ -69,11 +71,11 @@ impl Item {
         }
     }
 
-/// Remove the folder element from the DOM.
-///
-/// This function finds the element with the same ID as the item and removes
-/// it from its parent node in the DOM. If the element or its parent is not found,
-/// the function does nothing.
+    /// Remove the folder element from the DOM.
+    ///
+    /// This function finds the element with the same ID as the item and removes
+    /// it from its parent node in the DOM. If the element or its parent is not found,
+    /// the function does nothing.
 
     fn remove_folder(&self) {
         let document = web_sys::window().unwrap().document().unwrap();
@@ -97,4 +99,3 @@ impl Item {
         }
     }
 }
-

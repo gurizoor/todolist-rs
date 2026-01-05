@@ -1,4 +1,3 @@
-
 use stylist::StyleSource;
 
 use super::lib::*;
@@ -19,7 +18,8 @@ pub fn title() -> Style {
         r#"
             color: rgb(220, 220, 0);
         "#
-    ).unwrap()
+    )
+    .unwrap()
 }
 
 pub fn div_list() -> Style {
@@ -31,7 +31,8 @@ pub fn div_list() -> Style {
             padding: 5px;
             padding-left: 10px;
         "#
-    ).unwrap()
+    )
+    .unwrap()
 }
 
 pub fn button_list() -> Style {
@@ -42,7 +43,8 @@ pub fn button_list() -> Style {
             border-radius: 5px;
             color: rgb(220, 220, 220);
         "#
-    ).unwrap()
+    )
+    .unwrap()
 }
 
 pub fn task_input() -> Style {
@@ -53,7 +55,8 @@ pub fn task_input() -> Style {
             background-color: rgb(30, 30, 30);
             border: 1px solid rgb(255, 255, 255);
         "#
-    ).unwrap()
+    )
+    .unwrap()
 }
 
 pub fn task_button() -> Style {
@@ -64,7 +67,8 @@ pub fn task_button() -> Style {
             background: rgb(50, 50, 50);
             border: 1px solid rgb(200, 200, 200);
         "#
-    ).unwrap()
+    )
+    .unwrap()
 }
 
 pub fn task_checkbox() -> Style {
@@ -72,7 +76,8 @@ pub fn task_checkbox() -> Style {
         r#"
             accent-color: rgba(80, 120, 255, 1);
         "#
-    ).unwrap()
+    )
+    .unwrap()
 }
 
 pub fn folder_input() -> Style {
@@ -82,5 +87,6 @@ pub fn folder_input() -> Style {
             background-color: rgb(30, 30, 30);
             border: 1px solid rgb(255, 255, 255);
         "#
-    ).unwrap()
+    )
+    .unwrap()
 }

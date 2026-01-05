@@ -1,36 +1,32 @@
-
 // use web_sys::{wasm_bindgen::prelude::Closure, HtmlElement, HtmlInputElement};
 
 use super::super::lib::*;
 
 impl ItemManager {
-/// Create a new instance of `ItemManager` with an empty list of items.
-///
-/// This function initializes a new `ItemManager` with an empty `value`
-/// vector, which will hold items of type `Item`. It also logs an empty
-/// message to the console.
-    pub fn new() -> Self
-    {
+    /// Create a new instance of `ItemManager` with an empty list of items.
+    ///
+    /// This function initializes a new `ItemManager` with an empty `value`
+    /// vector, which will hold items of type `Item`. It also logs an empty
+    /// message to the console.
+    pub fn new() -> Self {
         log!("");
         Self {
-            value: Vec::<Item>::new()
+            value: Vec::<Item>::new(),
         }
     }
 
     /// Return a new ItemManager instance with all items sorted by their name
     /// in ascending order, and then by their level in ascending order.
-    pub fn sort_value(&self) -> Self
-    {
-       let mut value = self.value.clone();
-       value.sort_by(|a, b| a.value.cmp(&b.value));
-       value.sort_by(|a, b| a.level.cmp(&b.level));
-       Self { value: value }
+    pub fn sort_value(&self) -> Self {
+        let mut value = self.value.clone();
+        value.sort_by(|a, b| a.value.cmp(&b.value));
+        value.sort_by(|a, b| a.level.cmp(&b.level));
+        Self { value: value }
     }
 
     /// Return a new ItemManager instance with all items of level 1 removed from
     /// the list.
-    pub fn rmv_levl_below_1(&self) -> Self
-    {
+    pub fn rmv_levl_below_1(&self) -> Self {
         let mut value = self.value.clone();
         value.retain(|x| x.level > 1);
         Self { value: value }
@@ -42,12 +38,11 @@ impl ItemManager {
     /// it is not added again.
     ///
     /// The new item is added to the end of the list.
-    pub fn add(&self, item: Item) -> Self
-    {
+    pub fn add(&self, item: Item) -> Self {
         let mut value = self.value.clone();
         for value_item in &value {
             if value_item.id == item.id {
-                return Self{ value: value };
+                return Self { value: value };
             }
         }
         // item.add();
@@ -63,8 +58,7 @@ impl ItemManager {
     ///
     /// The returned ItemManager will have the item removed from its
     /// internal list.
-    pub fn rmv(&self, item: Item) -> Self
-    {
+    pub fn rmv(&self, item: Item) -> Self {
         item.rmv();
         let mut value = self.value.clone();
         value.retain(|x| x.id != item.id);
@@ -84,8 +78,7 @@ impl ItemManager {
     /// visible in the UI). The items are sorted first, and then serialized
     /// to JSON. The JSON is then stored in the "items" key in the local
     /// storage.
-    pub fn save_data(&self) -> Self
-    {
+    pub fn save_data(&self) -> Self {
         log!("");
         let mut value = self.sort_value().value;
         value.retain(|item| item.level > 1);
@@ -100,14 +93,15 @@ impl ItemManager {
     /// If data is not found in localStorage, return a new instance with an empty value.
     ///
     /// This method is used to load the data from localStorage when the application starts.
-    pub fn load_data(&self) -> Self
-    {
+    pub fn load_data(&self) -> Self {
         let mut new_self = self.clone();
         if let Ok(json) = gloo_storage::LocalStorage::get::<String>("items") {
             if let Ok(mut value) = serde_json::from_str::<Vec<Item>>(&json) {
                 value.retain(|item| item.level > 1);
                 new_self.value.append(&mut value);
-                return Self { value: new_self.value };
+                return Self {
+                    value: new_self.value,
+                };
             }
         }
         log!("");
@@ -117,8 +111,7 @@ impl ItemManager {
 
     /// Returns a new ItemManager instance with the value loaded from localStorage.
     /// If data is not found in localStorage, return a new instance with an empty value.
-    pub fn s_load_data() -> Self
-    {
+    pub fn s_load_data() -> Self {
         log!("");
         log!("s_load_data Function was called");
         if let Ok(json) = gloo_storage::LocalStorage::get::<String>("items") {
@@ -128,7 +121,9 @@ impl ItemManager {
                 return Self { value: value };
             }
         }
-        Self { value: Vec::<Item>::new() }
+        Self {
+            value: Vec::<Item>::new(),
+        }
     }
 
     /// Return the id of the selected folder.
@@ -136,8 +131,7 @@ impl ItemManager {
     /// This function go through self.value and find the first folder which is checked.
     /// If no folder is checked, return "Not found selected folder".
     ///
-    pub fn selected_folder(&self) -> String
-    {
+    pub fn selected_folder(&self) -> String {
         self.debug();
         log!("");
         log!("selected_folder Function was called");
@@ -146,9 +140,17 @@ impl ItemManager {
         let mut selected_folder = "Not found selected folder".to_string();
         for i in self.value.iter() {
             log!(format!("        Function selected_folder: {}", i.id));
-            if i.is_task {continue;}
-            let folder = document.get_element_by_id(&format!("{}-input", i.id)).unwrap();
-            if folder.dyn_ref::<web_sys::HtmlInputElement>().unwrap().checked() {
+            if i.is_task {
+                continue;
+            }
+            let folder = document
+                .get_element_by_id(&format!("{}-input", i.id))
+                .unwrap();
+            if folder
+                .dyn_ref::<web_sys::HtmlInputElement>()
+                .unwrap()
+                .checked()
+            {
                 selected_folder = i.id.clone();
             }
         }
@@ -181,9 +183,10 @@ impl ItemManager {
             || current_date_parts[0] != previous_date_parts[0];
 
         let week_changed = current_date_parts[0] != previous_date_parts[0]
-            || (current_date_parts[3] <= previous_date_parts[3] && (current_date_parts[2] != previous_date_parts[2] || current_date_parts[1] != previous_date_parts[1]))
+            || (current_date_parts[3] <= previous_date_parts[3]
+                && (current_date_parts[2] != previous_date_parts[2]
+                    || current_date_parts[1] != previous_date_parts[1]))
             || previous_date_parts[2] + 7 <= current_date_parts[2] + 0;
-
 
         let month_changed = current_date_parts[0] != previous_date_parts[0]
             || current_date_parts[1] != previous_date_parts[1];
@@ -202,17 +205,17 @@ impl ItemManager {
                     if day_changed {
                         new_item = new_item.set_checked(false);
                     }
-                },
+                }
                 "Week" => {
                     if week_changed {
                         new_item = new_item.set_checked(false);
                     }
-                },
+                }
                 "Month" => {
                     if month_changed {
                         new_item = new_item.set_checked(false);
                     }
-                },
+                }
                 _ => panic!("Invalid check type: {}", item.get_check_type()),
             }
             new_value.push(new_item);
@@ -230,11 +233,20 @@ impl ItemManager {
         new_self
     }
 
-    pub fn debug(&self)
-    {
+    pub fn debug(&self) {
         log!("");
-        log!(format!("{}",Local::now().format("%Y-%m-%d-%u").to_string()));//.split("-").collect::<Vec<_>>()));
-        log!(format!("{:?}", Local::now().format("%Y-%m-%d-%u").to_string().split("-").collect::<Vec<_>>()));
+        log!(format!(
+            "{}",
+            Local::now().format("%Y-%m-%d-%u").to_string()
+        )); //.split("-").collect::<Vec<_>>()));
+        log!(format!(
+            "{:?}",
+            Local::now()
+                .format("%Y-%m-%d-%u")
+                .to_string()
+                .split("-")
+                .collect::<Vec<_>>()
+        ));
         // log!(format!("{}", "2".to_string().parse::<usize>().unwrap()+1));
         // log!(format!("Function debug self.value:{:?}", &self.value));
         // log!(format!("Function debug LocalStorage: {:?}", &self.load_data().value));

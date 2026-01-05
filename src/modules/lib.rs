@@ -1,16 +1,15 @@
-
-pub use yew::prelude::*;
-pub use web_sys::wasm_bindgen::JsCast;
-pub use stylist::{css, style, Style, yew::Global};
 pub use super::style::*;
+pub use chrono::*;
 pub use gloo_console::log;
-pub use web_sys::{HtmlElement, HtmlInputElement};
-pub use web_sys::wasm_bindgen::prelude::Closure;
 pub use gloo_storage::LocalStorage;
 pub use gloo_storage::Storage;
-pub use chrono::*;
+pub use stylist::{css, style, yew::Global, Style};
+pub use web_sys::wasm_bindgen::prelude::Closure;
+pub use web_sys::wasm_bindgen::JsCast;
+pub use web_sys::{HtmlElement, HtmlInputElement};
+pub use yew::prelude::*;
 
-pub use serde::{Serialize, Deserialize};
+pub use serde::{Deserialize, Serialize};
 
 #[derive(Clone, PartialEq, Debug, Serialize, Deserialize, Ord, PartialOrd, Eq)]
 pub struct Item {
@@ -21,8 +20,7 @@ pub struct Item {
     pub is_task: bool, //Identify whether it is a task or a folder
 }
 
-
 #[derive(Clone, PartialEq, Debug)]
 pub struct ItemManager {
-    pub value: Vec<Item>
+    pub value: Vec<Item>,
 }
