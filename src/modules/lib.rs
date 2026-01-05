@@ -11,6 +11,8 @@ pub use yew::prelude::*;
 
 pub use serde::{Deserialize, Serialize};
 
+pub mod dom_utils;
+
 #[derive(Clone, PartialEq, Debug, Serialize, Deserialize, Ord, PartialOrd, Eq)]
 pub struct Item {
     pub id: String,    //general-+item
