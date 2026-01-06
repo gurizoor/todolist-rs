@@ -1,6 +1,7 @@
 // use web_sys::{wasm_bindgen::prelude::Closure, HtmlElement, HtmlInputElement};
 
 use super::super::lib::*;
+use super::super::lib::storage::{StorageManager, date_utils};
 
 impl ItemManager {
     /// Create a new instance of `ItemManager` with an empty list of items.
@@ -82,10 +83,12 @@ impl ItemManager {
         log!("");
         let mut value = self.sort_value().value;
         value.retain(|item| item.level > 1);
-        let json = serde_json::to_string(&value).unwrap();
-        LocalStorage::set("items", &json).expect("Unable to set local storage");
-        log!("Savaed to localStorage!");
-        log!(format!("    {:?}", ItemManager::s_load_data().value));
+        
+        if let Err(e) = StorageManager::save_items(&value) {
+            log!("Error saving items: {}", format!("{}", e));
+        }
+        
+        log!(format!("Saved items: {:?}", value));
         self.clone()
     }
 
@@ -95,17 +98,16 @@ impl ItemManager {
     /// This method is used to load the data from localStorage when the application starts.
     pub fn load_data(&self) -> Self {
         let mut new_self = self.clone();
-        if let Ok(json) = gloo_storage::LocalStorage::get::<String>("items") {
-            if let Ok(mut value) = serde_json::from_str::<Vec<Item>>(&json) {
-                value.retain(|item| item.level > 1);
-                new_self.value.append(&mut value);
-                return Self {
-                    value: new_self.value,
-                };
+        match StorageManager::load_items() {
+            Ok(mut loaded_items) => {
+                loaded_items.retain(|item| item.level > 1);
+                new_self.value.append(&mut loaded_items);
+                log!("Loaded from localStorage!");
+            }
+            Err(e) => {
+                log!("Error loading items: {}", format!("{}", e));
             }
         }
-        log!("");
-        log!("Loaded from localStorage!");
         new_self
     }
 
@@ -114,15 +116,18 @@ impl ItemManager {
     pub fn s_load_data() -> Self {
         log!("");
         log!("s_load_data Function was called");
-        if let Ok(json) = gloo_storage::LocalStorage::get::<String>("items") {
-            if let Ok(mut value) = serde_json::from_str::<Vec<Item>>(&json) {
+        match StorageManager::load_items() {
+            Ok(mut value) => {
                 value.retain(|item| item.level > 1);
                 log!(format!("Loaded from localStorage: {:?}", value));
-                return Self { value: value };
+                Self { value }
             }
-        }
-        Self {
-            value: Vec::<Item>::new(),
+            Err(e) => {
+                log!("Error loading items: {}", format!("{}", e));
+                Self {
+                    value: Vec::<Item>::new(),
+                }
+            }
         }
     }
 
@@ -161,35 +166,13 @@ impl ItemManager {
     pub fn init_checkbox(&self) -> Self {
         log!("");
         log!("init_checkbox Function was called");
-        let current_date = Local::now().format("%Y-%m-%d-%u").to_string();
+        
+        let current_date = date_utils::get_current_date();
+        let previous_date = StorageManager::load_previous_date().unwrap_or_else(|_| current_date.clone());
 
-        let mut previous_date = current_date.clone();
-        if let Ok(data) = gloo_storage::LocalStorage::get::<String>("previous_date") {
-            previous_date = data;
-        }
-
-        let current_date_parts = current_date
-            .split("-")
-            .map(|x| x.parse::<usize>().unwrap())
-            .collect::<Vec<_>>();
-
-        let previous_date_parts = previous_date
-            .split("-")
-            .map(|x| x.parse::<usize>().unwrap())
-            .collect::<Vec<_>>();
-
-        let day_changed = current_date_parts[2] != previous_date_parts[2]
-            || current_date_parts[1] != previous_date_parts[1]
-            || current_date_parts[0] != previous_date_parts[0];
-
-        let week_changed = current_date_parts[0] != previous_date_parts[0]
-            || (current_date_parts[3] <= previous_date_parts[3]
-                && (current_date_parts[2] != previous_date_parts[2]
-                    || current_date_parts[1] != previous_date_parts[1]))
-            || previous_date_parts[2] + 7 <= current_date_parts[2] + 0;
-
-        let month_changed = current_date_parts[0] != previous_date_parts[0]
-            || current_date_parts[1] != previous_date_parts[1];
+        let day_changed = date_utils::has_day_changed(&current_date, &previous_date).unwrap_or(false);
+        let week_changed = date_utils::has_week_changed(&current_date, &previous_date).unwrap_or(false);
+        let month_changed = date_utils::has_month_changed(&current_date, &previous_date).unwrap_or(false);
 
         log!(format!("day_changed: {}", day_changed));
         log!(format!("week_changed: {}", week_changed));
@@ -223,11 +206,14 @@ impl ItemManager {
         new_self.value = new_value;
 
         // save date
-        LocalStorage::set("previous_date", &current_date).expect("Unable to set local storage");
+        if let Err(e) = StorageManager::save_previous_date(&current_date) {
+            log!("Error saving previous date: {}", format!("{}", e));
+        }
 
         // save items
-        let json = serde_json::to_string(&new_self.value).unwrap();
-        LocalStorage::set("items", &json).expect("Unable to set local storage");
+        if let Err(e) = StorageManager::save_items(&new_self.value) {
+            log!("Error saving items: {}", format!("{}", e));
+        }
 
         log!(format!("new self value :{:?}", new_self.value));
         new_self

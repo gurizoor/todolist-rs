@@ -8,11 +8,10 @@
 # bash(powershell)
 
 ```bash
-trunk build --release --public-url [project name]
-[project name] = /todolist-rs/
+trunk build --release --public-url /[project name]/
 ```
 
-example
+Example in this code space
 
 ```bash
 trunk build --release --public-url /todolist-rs/

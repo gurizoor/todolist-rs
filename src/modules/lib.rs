@@ -1,7 +1,6 @@
 pub use super::style::*;
 pub use chrono::*;
 pub use gloo_console::log;
-pub use gloo_storage::LocalStorage;
 pub use gloo_storage::Storage;
 pub use stylist::{css, style, yew::Global, Style};
 pub use web_sys::wasm_bindgen::prelude::Closure;
@@ -12,6 +11,7 @@ pub use yew::prelude::*;
 pub use serde::{Deserialize, Serialize};
 
 pub mod dom_utils;
+pub mod storage;
 
 #[derive(Clone, PartialEq, Debug, Serialize, Deserialize, Ord, PartialOrd, Eq)]
 pub struct Item {
