@@ -11,7 +11,7 @@
 trunk build --release --public-url /[project name]/
 ```
 
-Example in this code space
+↓Example in this code space
 
 ```bash
 trunk build --release --public-url /todolist-rs/

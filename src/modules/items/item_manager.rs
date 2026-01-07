@@ -1,7 +1,8 @@
 // use web_sys::{wasm_bindgen::prelude::Closure, HtmlElement, HtmlInputElement};
 
 use super::super::lib::*;
-use super::super::lib::storage::{StorageManager, date_utils};
+use super::super::lib::storage::StorageManager;
+use super::super::lib::date_utils;
 
 impl ItemManager {
     /// Create a new instance of `ItemManager` with an empty list of items.
