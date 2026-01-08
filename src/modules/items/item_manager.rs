@@ -3,6 +3,7 @@
 use super::super::lib::*;
 use super::super::lib::storage::StorageManager;
 use super::super::lib::date_utils;
+use super::super::lib::dom_utils::*;
 
 impl ItemManager {
     /// Create a new instance of `ItemManager` with an empty list of items.
@@ -218,6 +219,94 @@ impl ItemManager {
 
         log!(format!("new self value :{:?}", new_self.value));
         new_self
+    }
+
+    /// Add an item to the DOM with all its elements and event listeners
+    pub fn add_item_to_dom(&self, item: &Item, can_remove: bool, items_state: &UseStateHandle<Self>) -> Item {
+        // Create container div
+        let container = create_container_div(item);
+        
+        // Set div class for folders
+        if !item.is_task {
+            container
+                .set_attribute("class", div_list().get_class_name())
+                .unwrap();
+        }
+        
+        // Create and setup input element
+        let input_element = create_input_element(item);
+        setup_input_click_listener(&input_element, item, items_state);
+        container.append_child(&input_element).unwrap();
+        
+        // Create and append label
+        let label_element = create_label_element(item);
+        container.append_child(&label_element).unwrap();
+        
+        // Create and setup remove button if needed
+        if can_remove {
+            let button_element = create_remove_button();
+            setup_remove_click_listener(&button_element, item, items_state);
+            container.append_child(&button_element).unwrap();
+        }
+
+        item.clone()
+    }
+
+    /// Add a new task to the current folder
+    pub fn add_task(&self, input_value: &str, items_state: &UseStateHandle<Self>) {
+        let div_id = format!("{}-+{}", self.selected_folder(), input_value);
+        let item = Item::new(div_id.clone(), false, true);
+        let new_items = self.add(self.add_item_to_dom(&item, true, items_state));
+        items_state.set(new_items.clone());
+        new_items.save_data();
+    }
+
+    /// Add a new folder
+    pub fn add_folder(&self, input_value: &str, items_state: &UseStateHandle<Self>) {
+        let div_id = format!("{}-+{}", self.selected_folder(), input_value);
+        let item = Item::new(div_id.clone(), false, false);
+        let new_items = self.add(self.add_item_to_dom(&item, true, items_state));
+        items_state.set(new_items.clone());
+        new_items.save_data();
+    }
+
+    /// Initialize default folders and load existing items
+    pub fn initialize_with_defaults(items_state: &UseStateHandle<Self>) {
+        log!("To-do list initialized");
+        let mut value = ItemManager::new();
+        
+        // Add default folders
+        value = value.add(value.add_item_to_dom(
+            &Item::new("task-list-+General".to_string(), true, false),
+            false,
+            items_state,
+        ));
+        value = value.add(value.add_item_to_dom(
+            &Item::new("task-list-+Day".to_string(), false, false),
+            false,
+            items_state,
+        ));
+        value = value.add(value.add_item_to_dom(
+            &Item::new("task-list-+Week".to_string(), false, false),
+            false,
+            items_state,
+        ));
+        value = value.add(value.add_item_to_dom(
+            &Item::new("task-list-+Month".to_string(), false, false),
+            false,
+            items_state,
+        ));
+
+        // Load existing items
+        let pre_value = value.load_data().sort_value();
+        if pre_value.rmv_levl_below_1().value.is_empty() {
+            log!("No items found");
+        } else {
+            for item in pre_value.rmv_levl_below_1().init_checkbox().value.clone() {
+                value = value.add(value.add_item_to_dom(&item, true, items_state));
+            }
+        }
+        items_state.set(pre_value);
     }
 
     pub fn debug(&self) {

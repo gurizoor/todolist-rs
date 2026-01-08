@@ -11,10 +11,16 @@
 trunk build --release --public-url /[project name]/
 ```
 
-↓Example in this code space
+↓例
 
 ```bash
 trunk build --release --public-url /todolist-rs/
+```
+
+
+```bash
+# 生成されたファイルをdocsフォルダーに移動
+trunk build --release --public-url /todolist-rs/ && rm -rf docs/* && mv dist/* docs/
 ```
 
 # github pages
