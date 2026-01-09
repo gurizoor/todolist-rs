@@ -93,7 +93,7 @@ pub fn app() -> Html {
                 // tasks will be appended here
             </div>
 
-            <a>{"ver 0.2.0"}</a>
+            <a>{"ver 0.2.1"}</a>
         </div>
     }
 }

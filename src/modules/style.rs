@@ -44,9 +44,11 @@ pub fn div_list() -> Style {
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
             transition: all 0.3s ease;
             label {
-                font-size: 26px;
-                font-weight: 700;
+                font-size: 22px;
+                font-weight: 400;
                 color: #ffffff;
+            }
+            &[data-deep="true"] label {
                 text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
                 -webkit-text-stroke: 1px rgba(0, 0, 0, 0.5);
                 text-stroke: 1px rgba(0, 0, 0, 0.5);

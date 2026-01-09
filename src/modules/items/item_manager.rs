@@ -231,6 +231,13 @@ impl ItemManager {
             container
                 .set_attribute("class", div_list().get_class_name())
                 .unwrap();
+            
+            // Add depth-based class for text stroke
+            if item.level >= 6 {
+                container
+                    .set_attribute("data-deep", "true")
+                    .unwrap();
+            }
         }
         
         // Create and setup input element
