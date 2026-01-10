@@ -54,6 +54,25 @@ pub fn app() -> Html {
         }
     };
 
+    let handle_keypress = {
+        let items = items.clone();
+        let input_value = input_value.clone();
+
+        Callback::from(move |e: KeyboardEvent| {
+            if e.key() == "Enter" {
+                e.prevent_default();
+                if e.shift_key() {
+                    // Shift+Enter: Add folder
+                    items.add_folder(&input_value, &items);
+                } else {
+                    // Enter: Add task
+                    items.add_task(&input_value, &items);
+                }
+                input_value.set("".to_string());
+            }
+        })
+    };
+
     use_effect_with((), {
         let items = items.clone();
         move |_| {
@@ -76,6 +95,7 @@ pub fn app() -> Html {
                     class={classes!(task_input())}
                     value={(*input_value).clone()}
                     oninput={on_input}
+                    onkeypress={handle_keypress}
                 />
                 <button
                     onclick={add_task}
@@ -93,7 +113,7 @@ pub fn app() -> Html {
                 // tasks will be appended here
             </div>
 
-            <a>{"ver 0.2.1"}</a>
+            <a>{"ver 0.2.2"}</a>
         </div>
     }
 }
