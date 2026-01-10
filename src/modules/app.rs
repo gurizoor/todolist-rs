@@ -87,7 +87,7 @@ pub fn app() -> Html {
                 <h2 class={classes!(title())}>{"Todo-list | rust.ver"}</h2>
             </div>
 
-            <div>
+            <div class={classes!(input_container())}>
                 <input
                     id="task_input"
                     type="text"
@@ -113,7 +113,7 @@ pub fn app() -> Html {
                 // tasks will be appended here
             </div>
 
-            <a>{"ver 0.2.2"}</a>
+            <a>{"ver 0.2.3"}</a>
         </div>
     }
 }

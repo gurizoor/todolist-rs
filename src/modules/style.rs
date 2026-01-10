@@ -12,6 +12,7 @@ pub fn global_style() -> StyleSource {
                 min-height: 100vh;
                 margin: 0;
                 padding: 20px;
+                padding-bottom: 100px;
             }
         "#
     )
@@ -26,6 +27,27 @@ pub fn title() -> Style {
             text-align: center;
             margin-bottom: 30px;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        "#
+    )
+    .unwrap()
+}
+
+pub fn input_container() -> Style {
+    style!(
+        r#"
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            z-index: 1000;
         "#
     )
     .unwrap()
@@ -102,6 +124,11 @@ pub fn task_input() -> Style {
             transition: all 0.3s ease;
             ::placeholder {
                 color: rgba(255, 255, 255, 0.7);
+            }
+            &:focus {
+                outline: none;
+                border-color: rgba(255, 255, 255, 0.5);
+                background: rgba(255, 255, 255, 0.2);
             }
         "#
     )
