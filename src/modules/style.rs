@@ -48,6 +48,38 @@ pub fn input_container() -> Style {
             align-items: center;
             gap: 10px;
             z-index: 1000;
+            flex-wrap: wrap;
+        "#
+    )
+    .unwrap()
+}
+
+pub fn undo_redo_button() -> Style {
+    style!(
+        r#"
+            background: linear-gradient(45deg, #28a745, #20c997);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            color: #ffffff;
+            padding: 10px 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            font-size: 14px;
+            transform: translateY(0);
+            &:hover {
+                background: linear-gradient(45deg, #34b853, #2dd4a0);
+                border-color: rgba(255, 255, 255, 0.5);
+                box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+                transform: translateY(-2px);
+            }
+            &:active {
+                background: linear-gradient(45deg, #218838, #1ea085);
+                border-color: rgba(255, 255, 255, 0.7);
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+                transform: translateY(0);
+            }
         "#
     )
     .unwrap()

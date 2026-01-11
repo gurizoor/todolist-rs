@@ -1,9 +1,9 @@
 // use web_sys::{wasm_bindgen::prelude::Closure, HtmlElement, HtmlInputElement};
 
-use super::super::lib::*;
-use super::super::lib::storage::StorageManager;
 use super::super::lib::date_utils;
 use super::super::lib::dom_utils::*;
+use super::super::lib::storage::StorageManager;
+use super::super::lib::*;
 
 impl ItemManager {
     /// Create a new instance of `ItemManager` with an empty list of items.
@@ -29,7 +29,7 @@ impl ItemManager {
 
     /// Return a new ItemManager instance with all items of level 1 removed from
     /// the list.
-    pub fn rmv_levl_below_1(&self) -> Self {
+    pub fn remove_level_below_1(&self) -> Self {
         let mut value = self.value.clone();
         value.retain(|x| x.level > 1);
         Self { value: value }
@@ -61,8 +61,8 @@ impl ItemManager {
     ///
     /// The returned ItemManager will have the item removed from its
     /// internal list.
-    pub fn rmv(&self, item: Item) -> Self {
-        item.rmv();
+    pub fn remove(&self, item: Item) -> Self {
+        item.remove();
         let mut value = self.value.clone();
         value.retain(|x| x.id != item.id);
         Self { value: value }
@@ -85,12 +85,12 @@ impl ItemManager {
         log!("");
         let mut value = self.sort_value().value;
         value.retain(|item| item.level > 1);
-        
+
         if let Err(e) = StorageManager::save_items(&value) {
             log!("Error saving items: {}", format!("{}", e));
         }
-        
-        log!(format!("Saved items: {:?}", value));
+
+        // log!(format!("Saved items: {:?}", value));
         self.clone()
     }
 
@@ -121,7 +121,7 @@ impl ItemManager {
         match StorageManager::load_items() {
             Ok(mut value) => {
                 value.retain(|item| item.level > 1);
-                log!(format!("Loaded from localStorage: {:?}", value));
+                // log!(format!("Loaded from localStorage: {:?}", value));
                 Self { value }
             }
             Err(e) => {
@@ -142,11 +142,11 @@ impl ItemManager {
         self.debug();
         log!("");
         log!("selected_folder Function was called");
-        log!(format!("    Function items.value:{:?}", &self.value));
+        // log!(format!("    Function items.value:{:?}", &self.value));
         let document = web_sys::window().unwrap().document().unwrap();
         let mut selected_folder = "Not found selected folder".to_string();
         for i in self.value.iter() {
-            log!(format!("        Function selected_folder: {}", i.id));
+            // log!(format!("        Function selected_folder: {}", i.id));
             if i.is_task {
                 continue;
             }
@@ -168,13 +168,17 @@ impl ItemManager {
     pub fn init_checkbox(&self) -> Self {
         log!("");
         log!("init_checkbox Function was called");
-        
-        let current_date = date_utils::get_current_date();
-        let previous_date = StorageManager::load_previous_date().unwrap_or_else(|_| current_date.clone());
 
-        let day_changed = date_utils::has_day_changed(&current_date, &previous_date).unwrap_or(false);
-        let week_changed = date_utils::has_week_changed(&current_date, &previous_date).unwrap_or(false);
-        let month_changed = date_utils::has_month_changed(&current_date, &previous_date).unwrap_or(false);
+        let current_date = date_utils::get_current_date();
+        let previous_date =
+            StorageManager::load_previous_date().unwrap_or_else(|_| current_date.clone());
+
+        let day_changed =
+            date_utils::has_day_changed(&current_date, &previous_date).unwrap_or(false);
+        let week_changed =
+            date_utils::has_week_changed(&current_date, &previous_date).unwrap_or(false);
+        let month_changed =
+            date_utils::has_month_changed(&current_date, &previous_date).unwrap_or(false);
 
         log!(format!("day_changed: {}", day_changed));
         log!(format!("week_changed: {}", week_changed));
@@ -217,42 +221,46 @@ impl ItemManager {
             log!("Error saving items: {}", format!("{}", e));
         }
 
-        log!(format!("new self value :{:?}", new_self.value));
+        // log!(format!("new self value :{:?}", new_self.value));
         new_self
     }
 
     /// Add an item to the DOM with all its elements and event listeners
-    pub fn add_item_to_dom(&self, item: &Item, can_remove: bool, items_state: &UseStateHandle<Self>) -> Item {
+    pub fn add_item_to_dom(
+        &self,
+        item: &Item,
+        can_remove: bool,
+        items_state: &UseStateHandle<Self>,
+        history: &UseStateHandle<History>,
+    ) -> Item {
         // Create container div
         let container = create_container_div(item);
-        
+
         // Set div class for folders
         if !item.is_task {
             container
                 .set_attribute("class", div_list().get_class_name())
                 .unwrap();
-            
+
             // Add depth-based class for text stroke
             if item.level >= 6 {
-                container
-                    .set_attribute("data-deep", "true")
-                    .unwrap();
+                container.set_attribute("data-deep", "true").unwrap();
             }
         }
-        
+
         // Create and setup input element
         let input_element = create_input_element(item);
         setup_input_click_listener(&input_element, item, items_state);
         container.append_child(&input_element).unwrap();
-        
+
         // Create and append label
         let label_element = create_label_element(item);
         container.append_child(&label_element).unwrap();
-        
+
         // Create and setup remove button if needed
         if can_remove {
             let button_element = create_remove_button();
-            setup_remove_click_listener(&button_element, item, items_state);
+            setup_remove_click_listener(&button_element, item, items_state, history);
             container.append_child(&button_element).unwrap();
         }
 
@@ -260,60 +268,92 @@ impl ItemManager {
     }
 
     /// Add a new task to the current folder
-    pub fn add_task(&self, input_value: &str, items_state: &UseStateHandle<Self>) {
+    pub fn add_task(
+        &self,
+        input_value: &str,
+        items_state: &UseStateHandle<Self>,
+        history: &UseStateHandle<History>,
+        is_undone: bool,
+    ) {
         let div_id = format!("{}-+{}", self.selected_folder(), input_value);
         let item = Item::new(div_id.clone(), false, true);
-        let new_items = self.add(self.add_item_to_dom(&item, true, items_state));
+        let new_items = self.add(self.add_item_to_dom(&item, true, items_state, history));
         items_state.set(new_items.clone());
         new_items.save_data();
+
+        history.set(history.add_log(item, true, new_items.clone(), is_undone));
     }
 
     /// Add a new folder
-    pub fn add_folder(&self, input_value: &str, items_state: &UseStateHandle<Self>) {
+    pub fn add_folder(
+        &self,
+        input_value: &str,
+        items_state: &UseStateHandle<Self>,
+        history: &UseStateHandle<History>,
+        is_undone: bool,
+    ) {
         let div_id = format!("{}-+{}", self.selected_folder(), input_value);
         let item = Item::new(div_id.clone(), false, false);
-        let new_items = self.add(self.add_item_to_dom(&item, true, items_state));
+        let new_items = self.add(self.add_item_to_dom(&item, true, items_state, history));
         items_state.set(new_items.clone());
         new_items.save_data();
+
+        history.set(history.add_log(item, true, new_items.clone(), is_undone));
     }
 
     /// Initialize default folders and load existing items
-    pub fn initialize_with_defaults(items_state: &UseStateHandle<Self>) {
+    pub fn initialize_with_defaults(
+        items_state: &UseStateHandle<Self>,
+        history: &UseStateHandle<History>,
+    ) {
         log!("To-do list initialized");
         let mut value = ItemManager::new();
-        
+
         // Add default folders
         value = value.add(value.add_item_to_dom(
-            &Item::new("task-list-+General".to_string(), true, false),
+            &Item::new("task-list-+General".to_string(), false, false),
             false,
             items_state,
+            history,
         ));
         value = value.add(value.add_item_to_dom(
             &Item::new("task-list-+Day".to_string(), false, false),
             false,
             items_state,
+            history,
         ));
         value = value.add(value.add_item_to_dom(
             &Item::new("task-list-+Week".to_string(), false, false),
             false,
             items_state,
+            history,
         ));
         value = value.add(value.add_item_to_dom(
             &Item::new("task-list-+Month".to_string(), false, false),
             false,
             items_state,
+            history,
         ));
 
         // Load existing items
         let pre_value = value.load_data().sort_value();
-        if pre_value.rmv_levl_below_1().value.is_empty() {
+        if pre_value.remove_level_below_1().value.is_empty() {
             log!("No items found");
         } else {
-            for item in pre_value.rmv_levl_below_1().init_checkbox().value.clone() {
-                value = value.add(value.add_item_to_dom(&item, true, items_state));
+            for item in pre_value
+                .remove_level_below_1()
+                .init_checkbox()
+                .value
+                .clone()
+            {
+                value = value.add(value.add_item_to_dom(&item, true, items_state, history));
             }
         }
         items_state.set(pre_value);
+
+        let logs = StorageManager::load_logs().unwrap();
+        history.set(logs.clone());
+        log!(format!("Loaded {:?} logs", logs.clone()));
     }
 
     pub fn debug(&self) {

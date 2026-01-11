@@ -5,6 +5,8 @@ use gloo_storage::{LocalStorage, Storage};
 const ITEMS_KEY: &str = "items";
 /// Storage key for previous date
 const PREVIOUS_DATE_KEY: &str = "previous_date";
+/// Storage key for logs
+const HISTORY_KEY: &str = "history";
 
 /// Storage abstraction layer for localStorage operations
 pub struct StorageManager;
@@ -45,6 +47,26 @@ impl StorageManager {
         } else {
             log!("No previous date found in localStorage");
             Ok(String::new())
+        }
+    }
+
+    /// Save logs to localStorage
+    pub fn save_logs(logs: &History) -> Result<(), Box<dyn std::error::Error>> {
+        let json = serde_json::to_string(logs)?;
+        LocalStorage::set(HISTORY_KEY, &json)?;
+        log!("Logs saved to localStorage");
+        Ok(())
+    }
+
+    /// Load logs from localStorage
+    pub fn load_logs() -> Result<History, Box<dyn std::error::Error>> {
+        if let Ok(json) = LocalStorage::get::<String>(HISTORY_KEY) {
+            let logs: History = serde_json::from_str(&json)?;
+            log!("Logs loaded from localStorage");
+            Ok(logs)
+        } else {
+            log!("No logs found in localStorage");
+            Ok(History::new())
         }
     }
 }

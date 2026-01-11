@@ -16,14 +16,22 @@ pub mod date_utils;
 
 #[derive(Clone, PartialEq, Debug, Serialize, Deserialize, Ord, PartialOrd, Eq)]
 pub struct Item {
-    pub id: String,    //general-+item
-    pub level: usize,  //general-event-item -> 3
-    pub value: String, // todo label
-    pub checked: bool, // ✅❌
-    pub is_task: bool, //Identify whether it is a task or a folder
+    pub id: String,     // general-+item
+    pub level: usize,   // general-event-item -> 3
+    pub value: String,  // todo label
+    pub checked: bool,  // ✅❌
+    pub is_task: bool,  // Identify whether it is a task or a folder
 }
 
 #[derive(Clone, PartialEq, Debug)]
 pub struct ItemManager {
     pub value: Vec<Item>,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct History {
+    pub history: Vec<Item>,
+    pub is_added_for_history: Vec<bool>,
+    pub undo_history: Vec<Item>,
+    pub is_added_for_undo_history: Vec<bool>,
 }

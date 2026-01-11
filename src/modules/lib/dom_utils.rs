@@ -1,4 +1,5 @@
 use super::*;
+use crate::modules::lib::storage::StorageManager;
 use web_sys::MouseEvent;
 
 /// Create a container div element for an item
@@ -65,7 +66,7 @@ pub fn setup_input_click_listener(
     let items_clone = items.clone();
     let item_clone = item.clone();
     let input_element_clone = input_element.clone();
-    
+
     let listener = Closure::wrap(Box::new(move |_: MouseEvent| {
         let mut value = ItemManager::s_load_data();
         value.value.retain(|x| x.id != item_clone.id);
@@ -86,16 +87,36 @@ pub fn setup_remove_click_listener(
     button_element: &web_sys::Element,
     item: &Item,
     items: &UseStateHandle<ItemManager>,
+    history: &UseStateHandle<History>,
 ) {
     let items_clone = items.clone();
     let item_clone = item.clone();
-    
+    let history_clone = history.clone();
+
     let listener = Closure::wrap(Box::new(move |_: MouseEvent| {
-        items_clone.set(
+        items_clone.set({
+            history_clone.set(StorageManager::load_logs().unwrap().add_log(
+                item_clone.clone(),
+                false,
+                ItemManager::s_load_data(),
+                false,
+            ));
+            // TODO この行を追加したらバグった？ 修正中
+            // history.set(StorageManager::load_logs().unwrap().clear_redo());
+            match StorageManager::load_logs() {
+                Ok(logs) => {
+                    history_clone.set(logs.clear_redo());
+                }
+                Err(_) => {
+                    log!("====Failed to load logs====");
+                }
+            }
+
+            // log!("loged!");
             ItemManager::s_load_data()
-                .rmv(item_clone.clone())
-                .save_data(),
-        );
+                .remove(item_clone.clone())
+                .save_data()
+        });
     }) as Box<dyn Fn(MouseEvent)>);
 
     button_element

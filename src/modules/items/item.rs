@@ -91,7 +91,7 @@ impl Item {
     /// If the item is a task, it removes the element with the same ID as the item.
     /// If the item is a folder, it removes the folder element with the same ID as the item.
     /// If the element or its parent is not found, the function does nothing.
-    pub fn rmv(&self) {
+    pub fn remove(&self) {
         if self.is_task {
             self.remove_task();
         } else {

@@ -25,6 +25,8 @@ pub fn app() -> Html {
     let items = use_state(|| ItemManager::new());
     let input_value = use_state(String::new);
 
+    let history = use_state(|| History::new());
+
     let on_input = {
         let input_value = input_value.clone();
         Callback::from(move |e: InputEvent| {
@@ -37,46 +39,83 @@ pub fn app() -> Html {
     let add_task = {
         let items = items.clone();
         let input_value = input_value.clone();
+        let history = history.clone();
 
-        move |_| {
-            items.add_task(&input_value, &items);
+        move |_: MouseEvent| {
+            items.add_task(&input_value, &items, &history, false);
             input_value.set("".to_string());
+            history.set(history.clear_redo());
         }
     };
 
     let add_folder = {
         let items = items.clone();
         let input_value = input_value.clone();
+        let history = history.clone();
 
-        move |_| {
-            items.add_folder(&input_value, &items);
+        move |_: MouseEvent| {
+            items.add_folder(&input_value, &items, &history, false);
             input_value.set("".to_string());
+            history.set(history.clear_redo());
         }
     };
 
     let handle_keypress = {
         let items = items.clone();
         let input_value = input_value.clone();
+        let history = history.clone();
 
         Callback::from(move |e: KeyboardEvent| {
-            if e.key() == "Enter" {
+            if e.key() == "Enter" && !input_value.is_empty() {
                 e.prevent_default();
+                
                 if e.shift_key() {
                     // Shift+Enter: Add folder
-                    items.add_folder(&input_value, &items);
+                    items.add_folder(&input_value, &items, &history, false);
+                    
                 } else {
                     // Enter: Add task
-                    items.add_task(&input_value, &items);
+                    items.add_task(&input_value, &items, &history, false);
                 }
                 input_value.set("".to_string());
+                history.set(history.clear_redo());
             }
+        })
+    };
+
+    let undo_action = {
+        let history = history.clone();
+        let items = items.clone();
+        Callback::from(move |_| {
+            history.set(history.undo(items.clone(), &history));
+            log!("undo_action was called")
+        })
+    };
+
+    let redo_action = {
+        let history = history.clone();
+        let items = items.clone();
+        Callback::from(move |_| {
+            history.set(history.redo(items.clone(), &history));
+            log!("Redo button clicked (functionality removed)");
+        })
+    };
+
+    let _debug_action = {
+        let history = history.clone();
+        // let items = items.clone();
+        Callback::from(move |_: MouseEvent| {
+            log!("Debug button clicked");
+            log!(format!("History: {:?}", history));
+            // log!(format!("Items: {:?}", items));
         })
     };
 
     use_effect_with((), {
         let items = items.clone();
+        let history = history.clone();
         move |_| {
-            ItemManager::initialize_with_defaults(&items);
+            ItemManager::initialize_with_defaults(&items, &history);
         }
     });
 
@@ -88,6 +127,19 @@ pub fn app() -> Html {
             </div>
 
             <div class={classes!(input_container())}>
+                // <button onclick={debug_action}>
+                //     {"debug"}
+                // </button>
+                <button
+                    onclick={undo_action}
+                    class={classes!(undo_redo_button())}>
+                    {"↶ Undo"}
+                </button>
+                <button
+                    onclick={redo_action}
+                    class={classes!(undo_redo_button())}>
+                    {"↷ Redo"}
+                </button>
                 <input
                     id="task_input"
                     type="text"
@@ -113,7 +165,7 @@ pub fn app() -> Html {
                 // tasks will be appended here
             </div>
 
-            <a>{"ver 0.2.3"}</a>
+            <a>{"ver 0.3.0"}</a>
         </div>
     }
 }
