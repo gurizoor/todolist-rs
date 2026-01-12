@@ -101,8 +101,6 @@ pub fn setup_remove_click_listener(
                 ItemManager::s_load_data(),
                 false,
             ));
-            // TODO この行を追加したらバグった？ 修正中
-            // history.set(StorageManager::load_logs().unwrap().clear_redo());
             match StorageManager::load_logs() {
                 Ok(logs) => {
                     history_clone.set(logs.clear_redo());

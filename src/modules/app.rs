@@ -24,6 +24,17 @@ use super::lib::ItemManager;
 pub fn app() -> Html {
     let items = use_state(|| ItemManager::new());
     let input_value = use_state(String::new);
+    let settings_open = use_state(|| false);
+    let current_theme = use_state(|| {
+        if let Some(window) = web_sys::window() {
+            if let Ok(Some(storage)) = window.local_storage() {
+                if let Ok(Some(theme)) = storage.get_item("theme") {
+                    return theme;
+                }
+            }
+        }
+        "default".to_string()
+    });
 
     let history = use_state(|| History::new());
 
@@ -101,6 +112,99 @@ pub fn app() -> Html {
         })
     };
 
+    let toggle_settings = {
+        let settings_open = settings_open.clone();
+        Callback::from(move |_| {
+            settings_open.set(!*settings_open);
+        })
+    };
+
+    let change_theme = {
+        let current_theme = current_theme.clone();
+        let settings_open = settings_open.clone();
+        Callback::from(move |theme: String| {
+            if let Some(window) = web_sys::window() {
+                if let Ok(Some(storage)) = window.local_storage() {
+                    let _ = storage.set_item("theme", &theme);
+                }
+                
+                // Show reload notification
+                if let Some(document) = window.document() {
+                    if let Some(body) = document.body() {
+                        // Create notification element
+                        let notification = document.create_element("div").unwrap();
+                        notification.set_attribute("style", 
+                            "position: fixed; top: 20px; right: 20px; background: rgba(0, 0, 0, 0.8); color: white; padding: 15px 20px; border-radius: 8px; z-index: 3000; font-size: 14px; max-width: 300px;"
+                        ).unwrap();
+                        notification.set_inner_html("テーマを変更しました。<br>変更を完全に適用するにはページをリロードしてください。<br><small>リロードすると現在の作業内容は保存されます。</small>");
+                        
+                        // Add buttons container
+                        let buttons_container = document.create_element("div").unwrap();
+                        buttons_container.set_attribute("style", "margin-top: 10px; display: flex; gap: 10px;").unwrap();
+                        
+                        // Add reload button
+                        let reload_btn = document.create_element("button").unwrap();
+                        reload_btn.set_attribute("style", 
+                            "background: #28a745; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px;"
+                        ).unwrap();
+                        reload_btn.set_inner_html("今すぐリロード");
+                        
+                        let reload_listener = Closure::wrap(Box::new(move |_: MouseEvent| {
+                            if let Some(window) = web_sys::window() {
+                                window.location().reload().unwrap();
+                            }
+                        }) as Box<dyn FnMut(_)>);
+                        
+                        reload_btn.add_event_listener_with_callback("click", reload_listener.as_ref().unchecked_ref()).ok();
+                        reload_listener.forget();
+                        
+                        // Add close button
+                        let close_btn = document.create_element("button").unwrap();
+                        close_btn.set_attribute("style", 
+                            "background: #6c757d; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px;"
+                        ).unwrap();
+                        close_btn.set_inner_html("閉じる");
+                        
+                        let notification_clone = notification.clone();
+                        let close_listener = Closure::wrap(Box::new(move |_: MouseEvent| {
+                            if let Some(parent) = notification_clone.parent_node() {
+                                parent.remove_child(&notification_clone).ok();
+                            }
+                        }) as Box<dyn FnMut(_)>);
+                        
+                        close_btn.add_event_listener_with_callback("click", close_listener.as_ref().unchecked_ref()).ok();
+                        close_listener.forget();
+                        
+                        buttons_container.append_child(&reload_btn).unwrap();
+                        buttons_container.append_child(&close_btn).unwrap();
+                        notification.append_child(&buttons_container).unwrap();
+                        body.append_child(&notification).unwrap();
+                        
+                        // Auto-remove after 8 seconds
+                        let notification_auto = notification.clone();
+                        let timeout_closure = Closure::wrap(Box::new(move || {
+                            if let Some(parent) = notification_auto.parent_node() {
+                                parent.remove_child(&notification_auto).ok();
+                            }
+                        }) as Box<dyn Fn()>);
+                        
+                        window.set_timeout_with_callback_and_timeout_and_arguments_0(
+                            timeout_closure.as_ref().unchecked_ref(),
+                            8000,
+                        ).ok();
+                        timeout_closure.forget();
+                    }
+                }
+            }
+            
+            // Update theme state
+            current_theme.set(theme);
+            
+            // Close settings modal
+            settings_open.set(false);
+        })
+    };
+
     let _debug_action = {
         let history = history.clone();
         // let items = items.clone();
@@ -121,12 +225,17 @@ pub fn app() -> Html {
 
     html! {
         <div>
-            <Global css={global_style()}/>
+            <Global css={global_style_for_theme(&current_theme.clone())}/>
             <div>
                 <h2 class={classes!(title())}>{"Todo-list | rust.ver"}</h2>
             </div>
 
             <div class={classes!(input_container())}>
+                <button
+                    onclick={toggle_settings.clone()}
+                    class={classes!(settings_button())}>
+                    {"⚙️"}
+                </button>
                 // <button onclick={debug_action}>
                 //     {"debug"}
                 // </button>
@@ -165,7 +274,54 @@ pub fn app() -> Html {
                 // tasks will be appended here
             </div>
 
-            <a>{"ver 0.3.0"}</a>
+            {if *settings_open {
+                html! {
+                    <div class={classes!(settings_overlay())}>
+                        <div class={classes!(settings_modal())}>
+                            <div class={classes!(settings_header())}>
+                                <h3>{"設定"}</h3>
+                                <button onclick={toggle_settings.clone()} class={classes!(close_button())}>
+                                    {"✕"}
+                                </button>
+                            </div>
+                            <div class={classes!(settings_content())}>
+                                <div class={classes!(settings_section())}>
+                                    <h4>{"テーマ"}</h4>
+                                    <div class={classes!(theme_options())}>
+                                        <button 
+                                            onclick={change_theme.reform(|_| "default".to_string())}
+                                            class={classes!(theme_button())}>
+                                            {"デフォルト"}
+                                        </button>
+                                        <button 
+                                            onclick={change_theme.reform(|_| "dark".to_string())}
+                                            class={classes!(theme_button())}>
+                                            {"ダーク"}
+                                        </button>
+                                        <button 
+                                            onclick={change_theme.reform(|_| "light".to_string())}
+                                            class={classes!(theme_button())}>
+                                            {"ライト"}
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class={classes!(settings_section())}>
+                                    <h4>{"リンク"}</h4>
+                                    <a href="https://github.com/gurizoor/todolist-rs#" 
+                                       target="_blank" 
+                                       class={classes!(github_link())}>
+                                        {"ソースコードやフィードバックはこちら"}
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            } else {
+                html! {}
+            }}
+
+            <a>{"ver 0.4.0"}</a>
         </div>
     }
 }

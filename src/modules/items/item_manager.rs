@@ -233,6 +233,21 @@ impl ItemManager {
         items_state: &UseStateHandle<Self>,
         history: &UseStateHandle<History>,
     ) -> Item {
+        // Get current theme
+        let current_theme = if let Some(window) = web_sys::window() {
+            if let Ok(Some(storage)) = window.local_storage() {
+                if let Ok(Some(theme)) = storage.get_item("theme") {
+                    theme
+                } else {
+                    "default".to_string()
+                }
+            } else {
+                "default".to_string()
+            }
+        } else {
+            "default".to_string()
+        };
+        
         // Create container div
         let container = create_container_div(item);
 
@@ -242,8 +257,14 @@ impl ItemManager {
                 .set_attribute("class", div_list().get_class_name())
                 .unwrap();
 
-            // Add depth-based class for text stroke
-            if item.level >= 6 {
+            // Add depth-based class for text stroke based on theme
+            let threshold = match current_theme.as_str() {
+                "dark" => 9,
+                "light" => 999, // Never apply stroke for light theme
+                _ => 6, // default theme
+            };
+            
+            if item.level >= threshold {
                 container.set_attribute("data-deep", "true").unwrap();
             }
         }
