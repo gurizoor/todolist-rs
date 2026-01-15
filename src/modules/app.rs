@@ -224,7 +224,7 @@ pub fn app() -> Html {
     });
 
     html! {
-        <div>
+        <>
             <Global css={global_style_for_theme(&current_theme.clone())}/>
             <div>
                 <h2 class={classes!(title())}>{"Todo-list | rust.ver"}</h2>
@@ -239,16 +239,18 @@ pub fn app() -> Html {
                 // <button onclick={debug_action}>
                 //     {"debug"}
                 // </button>
-                <button
-                    onclick={undo_action}
-                    class={classes!(undo_redo_button())}>
-                    {"↶ Undo"}
-                </button>
-                <button
-                    onclick={redo_action}
-                    class={classes!(undo_redo_button())}>
-                    {"↷ Redo"}
-                </button>
+                <div class={classes!(undo_redo_container())}>
+                    <button
+                        onclick={undo_action}
+                        class={classes!(undo_redo_button())}>
+                        {"↶ Undo"}
+                    </button>
+                    <button
+                        onclick={redo_action}
+                        class={classes!(undo_redo_button())}>
+                        {"↷ Redo"}
+                    </button>
+                </div>
                 <input
                     id="task_input"
                     type="text"
@@ -258,16 +260,18 @@ pub fn app() -> Html {
                     oninput={on_input}
                     onkeypress={handle_keypress}
                 />
-                <button
-                    onclick={add_task}
-                    class={classes!(task_button())}>
-                    {"add-task"}
-                </button>
-                <button
-                    onclick={add_folder}
-                    class={classes!(task_button())}>
-                    {"add-folder"}
-                </button>
+                <div class={classes!(action_buttons_container())}>
+                    <button
+                        onclick={add_task}
+                        class={classes!(task_button())}>
+                        {"add-task"}
+                    </button>
+                    <button
+                        onclick={add_folder}
+                        class={classes!(task_button())}>
+                        {"add-folder"}
+                    </button>
+                </div>
             </div>
 
             <div id="task-list">
@@ -321,7 +325,7 @@ pub fn app() -> Html {
                 html! {}
             }}
 
-            <a>{"ver 0.4.0"}</a>
-        </div>
+            <a>{"ver 0.4.1"}</a>
+        </>
     }
 }

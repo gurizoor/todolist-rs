@@ -15,6 +15,20 @@ pub fn global_style_for_theme(theme: &str) -> StyleSource {
                     padding: 20px;
                     padding-bottom: 100px;
                 }
+                @media (max-width: 768px) {
+                    body {
+                        padding: 15px;
+                        padding-bottom: 70px;
+                        font-size: 16px;
+                    }
+                }
+                @media (max-width: 480px) {
+                    body {
+                        padding: 10px;
+                        padding-bottom: 200px;
+                        font-size: 14px;
+                    }
+                }
             "#
         ),
         "light" => css!(
@@ -26,7 +40,21 @@ pub fn global_style_for_theme(theme: &str) -> StyleSource {
                     min-height: 100vh;
                     margin: 0;
                     padding: 20px;
-                    padding-bottom: 100px;
+                    padding-bottom: 80px;
+                }
+                @media (max-width: 768px) {
+                    body {
+                        padding: 15px;
+                        padding-bottom: 65px;
+                        font-size: 16px;
+                    }
+                }
+                @media (max-width: 480px) {
+                    body {
+                        padding: 10px;
+                        padding-bottom: 200px;
+                        font-size: 14px;
+                    }
                 }
                 h2 {
                     color: #333333 !important;
@@ -81,7 +109,21 @@ pub fn global_style_for_theme(theme: &str) -> StyleSource {
                     min-height: 100vh;
                     margin: 0;
                     padding: 20px;
-                    padding-bottom: 100px;
+                    padding-bottom: 80px;
+                }
+                @media (max-width: 768px) {
+                    body {
+                        padding: 15px;
+                        padding-bottom: 65px;
+                        font-size: 16px;
+                    }
+                }
+                @media (max-width: 480px) {
+                    body {
+                        padding: 10px;
+                        padding-bottom: 200px;
+                        font-size: 14px;
+                    }
                 }
             "#
         ),
@@ -97,6 +139,17 @@ pub fn title() -> Style {
             text-align: center;
             margin-bottom: 30px;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            @media (max-width: 768px) {
+                font-size: 2rem;
+                margin-bottom: 25px;
+                margin-top: 10px;
+            }
+            @media (max-width: 480px) {
+                font-size: 1.5rem;
+                margin-bottom: 20px;
+                margin-top: 5px;
+                line-height: 1.2;
+            }
         "#
     )
     .unwrap()
@@ -112,13 +165,40 @@ pub fn input_container() -> Style {
             background: rgba(0, 0, 0, 0.8);
             backdrop-filter: blur(10px);
             border-top: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 20px;
+            padding: 15px;
             display: flex;
-            justify-content: center;
+            justify-content: space-between;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
             z-index: 1000;
-            flex-wrap: wrap;
+            flex-wrap: nowrap;
+            @media (max-width: 768px) {
+                padding: 12px;
+                gap: 6px;
+            }
+            @media (max-width: 480px) {
+                padding: 10px;
+                gap: 4px;
+                flex-direction: column;
+                align-items: stretch;
+                min-height: auto;
+            }
+        "#
+    )
+    .unwrap()
+}
+
+pub fn undo_redo_container() -> Style {
+    style!(
+        r#"
+            display: flex;
+            gap: 4px;
+            align-items: center;
+            @media (max-width: 480px) {
+                justify-content: space-between;
+                width: 100%;
+                margin-bottom: 3px;
+            }
         "#
     )
     .unwrap()
@@ -131,13 +211,15 @@ pub fn undo_redo_button() -> Style {
             border: 2px solid rgba(255, 255, 255, 0.3);
             border-radius: 8px;
             color: #ffffff;
-            padding: 10px 16px;
+            padding: 8px 16px;
             font-weight: 500;
             cursor: pointer;
             transition: all 0.3s ease;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
             font-size: 14px;
             transform: translateY(0);
+            flex-shrink: 0;
+            white-space: nowrap;
             &:hover {
                 background: linear-gradient(45deg, #34b853, #2dd4a0);
                 border-color: rgba(255, 255, 255, 0.5);
@@ -149,6 +231,33 @@ pub fn undo_redo_button() -> Style {
                 border-color: rgba(255, 255, 255, 0.7);
                 box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
                 transform: translateY(0);
+            }
+            @media (max-width: 768px) {
+                padding: 3px 5px;
+                font-size: 9px;
+            }
+            @media (max-width: 480px) {
+                padding: 6px;
+                font-size: 12px;
+                width: 49%;
+                margin-bottom: 3px;
+            }
+        "#
+    )
+    .unwrap()
+}
+
+pub fn action_buttons_container() -> Style {
+    style!(
+        r#"
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            @media (max-width: 480px) {
+                flex-direction: row;
+                width: 100%;
+                margin-bottom: 3px;
+                gap: 4px;
             }
         "#
     )
@@ -176,6 +285,24 @@ pub fn div_list() -> Style {
                 text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
                 -webkit-text-stroke: 1px rgba(0, 0, 0, 0.5);
                 text-stroke: 1px rgba(0, 0, 0, 0.5);
+            }
+            @media (max-width: 768px) {
+                margin: 8px 0;
+                padding: 12px;
+                padding-left: 15px;
+                label {
+                    font-size: 18px;
+                }
+            }
+            @media (max-width: 480px) {
+                margin: 5px 0;
+                padding: 10px;
+                padding-left: 12px;
+                border-radius: 10px;
+                label {
+                    font-size: 16px;
+                    line-height: 1.3;
+                }
             }
         "#
     )
@@ -215,9 +342,10 @@ pub fn button_list() -> Style {
 pub fn task_input() -> Style {
     style!(
         r#"
-            width: 50%;
-            padding: 12px 16px;
-            font-size: 16px;
+            flex: 1;
+            min-width: 0;
+            padding: 8px 12px;
+            font-size: 14px;
             color: #ffffff;
             background: rgba(255, 255, 255, 0.1);
             border: 1px solid rgba(255, 255, 255, 0.3);
@@ -231,6 +359,15 @@ pub fn task_input() -> Style {
                 outline: none;
                 border-color: rgba(255, 255, 255, 0.5);
                 background: rgba(255, 255, 255, 0.2);
+            }
+            @media (max-width: 768px) {
+                padding: 6px 10px;
+                font-size: 13px;
+            }
+            @media (max-width: 480px) {
+                padding: 10px;
+                font-size: 14px;
+                margin-bottom: 4px;
             }
         "#
     )
@@ -251,6 +388,12 @@ pub fn task_button() -> Style {
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
             font-size: 14px;
             transform: translateY(0);
+            flex-shrink: 0;
+            white-space: nowrap;
+            min-height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             &:hover {
                 background: linear-gradient(45deg, #7c8ff0, #8b5bb8);
                 border-color: rgba(255, 255, 255, 0.5);
@@ -262,6 +405,16 @@ pub fn task_button() -> Style {
                 border-color: rgba(255, 255, 255, 0.7);
                 box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
                 transform: translateY(0);
+            }
+            @media (max-width: 768px) {
+                padding: 5px 10px;
+                font-size: 11px;
+            }
+            @media (max-width: 480px) {
+                padding: 6px;
+                font-size: 12px;
+                flex: 1;
+                margin-bottom: 0;
             }
         "#
     )
@@ -299,12 +452,17 @@ pub fn settings_button() -> Style {
             border: 2px solid rgba(255, 255, 255, 0.3);
             border-radius: 8px;
             color: #ffffff;
-            padding: 10px 12px;
+            padding: 8px 8px;
             font-size: 16px;
             cursor: pointer;
             transition: all 0.3s ease;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
             transform: translateY(0);
+            flex-shrink: 0;
+            min-height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             &:hover {
                 background: linear-gradient(45deg, #7d858a, #5a6168);
                 border-color: rgba(255, 255, 255, 0.5);
@@ -316,6 +474,19 @@ pub fn settings_button() -> Style {
                 border-color: rgba(255, 255, 255, 0.7);
                 box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
                 transform: translateY(0);
+            }
+            @media (max-width: 768px) {
+                padding: 6px 8px;
+                font-size: 12px;
+                min-height: 28px;
+            }
+            @media (max-width: 480px) {
+                padding: 8px;
+                font-size: 14px;
+                width: 10%;
+                margin-bottom: 3px;
+                min-height: 32px;
+                aspect-ratio: 1;
             }
         "#
     )
@@ -370,6 +541,17 @@ pub fn settings_modal() -> Style {
                     transform: translateY(0);
                 }
             }
+            @media (max-width: 768px) {
+                width: 95%;
+                max-height: 85vh;
+                border-radius: 10px;
+            }
+            @media (max-width: 480px) {
+                width: 98%;
+                max-height: 90vh;
+                border-radius: 8px;
+                margin: 10px;
+            }
         "#
     )
     .unwrap()
@@ -388,6 +570,18 @@ pub fn settings_header() -> Style {
                 color: #ffffff;
                 font-size: 1.5rem;
                 font-weight: 400;
+            }
+            @media (max-width: 768px) {
+                padding: 15px 20px;
+                h3 {
+                    font-size: 1.3rem;
+                }
+            }
+            @media (max-width: 480px) {
+                padding: 12px 15px;
+                h3 {
+                    font-size: 1.1rem;
+                }
             }
         "#
     )
@@ -420,6 +614,14 @@ pub fn settings_content() -> Style {
             padding: 25px;
             overflow-y: auto;
             max-height: calc(80vh - 80px);
+            @media (max-width: 768px) {
+                padding: 20px;
+                max-height: calc(85vh - 70px);
+            }
+            @media (max-width: 480px) {
+                padding: 15px;
+                max-height: calc(90vh - 60px);
+            }
         "#
     )
     .unwrap()
@@ -447,6 +649,10 @@ pub fn theme_options() -> Style {
             display: flex;
             gap: 10px;
             flex-wrap: wrap;
+            @media (max-width: 480px) {
+                flex-direction: column;
+                gap: 8px;
+            }
         "#
     )
     .unwrap()
@@ -477,6 +683,15 @@ pub fn theme_button() -> Style {
                 border-color: rgba(255, 255, 255, 0.7);
                 box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
                 transform: translateY(0);
+            }
+            @media (max-width: 768px) {
+                padding: 6px 12px;
+                font-size: 12px;
+            }
+            @media (max-width: 480px) {
+                padding: 10px;
+                font-size: 14px;
+                width: 100%;
             }
         "#
     )
