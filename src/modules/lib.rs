@@ -13,6 +13,7 @@ pub use serde::{Deserialize, Serialize};
 pub mod dom_utils;
 pub mod storage;
 pub mod date_utils;
+pub mod notification_utils;
 
 #[derive(Clone, PartialEq, Debug, Serialize, Deserialize, Ord, PartialOrd, Eq)]
 pub struct Item {
